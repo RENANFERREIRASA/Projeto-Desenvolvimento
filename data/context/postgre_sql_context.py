@@ -14,7 +14,7 @@ class Postgre_Sql_Context:
         self.parametros_conexao = {
             'host': "127.0.0.1",
             'port': "5432",
-            'database': "Mercado",
+            'database': "Escola",
             'user': "postgres",
             'password': '123'
         }

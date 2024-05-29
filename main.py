@@ -8,5 +8,5 @@ janela = tk.Tk()
 principal = TelaPrincipal(janela)
 
 janela.title('Bem Vindo a Tela de Cadastro')
-janela.geometry("600x500")
+janela.geometry("1000x500")
 janela.mainloop()

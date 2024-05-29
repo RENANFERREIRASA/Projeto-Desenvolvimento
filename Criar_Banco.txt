@@ -1,0 +1,32 @@
+Criar o banco de dados
+
+
+
+
+Colocar nome Escola
+
+Fazer uma query
+
+
+
+-- Tabela de Alunos
+CREATE TABLE Alunos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+-- Tabela de Disciplinas
+CREATE TABLE Disciplinas (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+-- Tabela de Notas
+CREATE TABLE Notas (
+    id SERIAL PRIMARY KEY,
+    aluno_id INT NOT NULL,
+    disciplina_id INT NOT NULL,
+    nota DECIMAL(5, 2) NOT NULL,
+    FOREIGN KEY (aluno_id) REFERENCES Alunos(id),
+    FOREIGN KEY (disciplina_id) REFERENCES Disciplinas(id)
+);

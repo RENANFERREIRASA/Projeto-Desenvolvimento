@@ -7,11 +7,11 @@ class TelaSelecao(tk.Toplevel):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.title("Lista de Produtos")
+        self.title("Lista de Notas")
         self.geometry("600x500")
 
         # Exemplo de componente da tela de seleção
-        self.label = ttk.Label(self, text="Lista de Produtos Cadastrados")
+        self.label = ttk.Label(self, text="Lista de Notas Cadastradas")
         self.label.place(x=20, y=10)
 
         self.back_button = ttk.Button(self, text="Voltar para a Tela Principal", command=self.voltarTelaPrincipal)
@@ -21,17 +21,15 @@ class TelaSelecao(tk.Toplevel):
         self.dados = []
 
         # Criar Treeview
-        self.tree = ttk.Treeview(self, columns=("ID", "Codigo", "Nome", "Preco"), show='headings')
-        self.tree.heading('ID', text="ID")
-        self.tree.heading("Codigo", text="Codigo")
-        self.tree.heading("Nome", text="Nome")
-        self.tree.heading("Preco", text="Preço")
+        self.tree = ttk.Treeview(self, columns=("Aluno", "Disciplina", "Nota"), show='headings')
+        self.tree.heading('Aluno', text="Aluno")
+        self.tree.heading("Disciplina", text="Disciplina")
+        self.tree.heading("Nota", text="Nota")
 
         # Definir largura das colunas
-        self.tree.column("ID", width=50)
-        self.tree.column("Codigo", width=100)
-        self.tree.column("Nome", width=200)
-        self.tree.column("Preco", width=100)
+        self.tree.column("Aluno", width=200)
+        self.tree.column("Disciplina", width=200)
+        self.tree.column("Nota", width=100)
 
         self.tree.pack(fill=tk.BOTH, expand=True)
 
@@ -43,12 +41,17 @@ class TelaSelecao(tk.Toplevel):
 
     def obterDados(self):
         try:
-            query = "SELECT id, codigo, nome, preco FROM public.produtos"
+            query = """
+            SELECT DISTINCT Alunos.nome, Disciplinas.nome, Notas.nota
+            FROM Alunos
+            INNER JOIN Notas ON Alunos.id = Notas.aluno_id
+            INNER JOIN Disciplinas ON Disciplinas.id = Notas.disciplina_id
+            """
             self.db_pg_context.conectar()
             result = self.db_pg_context.executar_query_sql(query)
             self.db_pg_context.desconectar()
 
-            self.dados = [{"id": row[0], "codigo": row[1], "nome": row[2], "preco": row[3]} for row in result]
+            self.dados = result
             self.inserirDadosTabela()
 
         except Exception as e:
@@ -56,8 +59,8 @@ class TelaSelecao(tk.Toplevel):
 
     def inserirDadosTabela(self):
         # Inserir dados no Treeview
-        for produto in self.dados:
-            self.tree.insert("", "end", values=(produto["id"], produto["codigo"], produto["nome"], produto["preco"]))
+        for aluno, disciplina, nota in self.dados:
+            self.tree.insert("", "end", values=(aluno, disciplina, nota))
 
     def voltarTelaPrincipal(self):
         self.destroy()
