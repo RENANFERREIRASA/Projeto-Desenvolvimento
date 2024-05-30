@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from data.context.postgre_sql_context import Postgre_Sql_Context
 from telas.tela_selecao import TelaSelecao
 
@@ -21,7 +21,7 @@ class TelaPrincipal:
         self.btnExcluir = tk.Button(win, text='Excluir', command=self.fExcluirNota)
         self.btnLimpar = tk.Button(win, text='Limpar', command=self.fLimparTela)
         self.btnListaAlunos = tk.Button(win, text='Lista de Alunos', command=self.ListaAlunosbtnListaAlunos)
-        self.btnCalcularCR = tk.Button(win, text='Calcular CR')
+        self.btnCalcularCR = tk.Button(win, text='Calcular CR', command=self.fCalcularCR)
 
         # Posicionamento dos Componentes
         self.lbAluno.place(x=100, y=50)
@@ -40,14 +40,65 @@ class TelaPrincipal:
         # Inicia a conexão com o banco de dados
         self.db_pg_context = Postgre_Sql_Context()
 
+    def fCalcularCR(self):
+        try:
+            self.db_pg_context.conectar()
+            query_calcular_cr = """
+                SELECT a.nome AS aluno, AVG(n.nota) AS cr
+                FROM public.notas n
+                JOIN public.alunos a ON n.aluno_id = a.id
+                GROUP BY a.nome
+                ORDER BY cr DESC;
+            """
+            resultados = self.db_pg_context.executar_query_sql(query_calcular_cr)
+            self.db_pg_context.desconectar()
+
+            self.mostrarResultadosCR(resultados)
+        except Exception as e:
+            print('Não foi possível calcular o CR.', e)
+
+    def mostrarResultadosCR(self, resultados):
+        top = tk.Toplevel(self.win)
+        top.title("Coeficiente de Rendimento (CR) dos Alunos")
+
+        tree = ttk.Treeview(top, columns=('Aluno', 'CR'), show='headings')
+        tree.heading('Aluno', text='Aluno')
+        tree.heading('CR', text='CR')
+
+        for resultado in resultados:
+            tree.insert('', tk.END, values=(resultado[0], round(resultado[1], 2)))
+
+        tree.pack(expand=True, fill='both')
+        top.geometry("400x300")
+
     def fCadastrarNota(self):
         try:
             aluno, disciplina, nota = self.fLerCampos()
+            if self.verificarExistenciaNota(aluno, disciplina):
+                messagebox.showwarning("Erro", "A nota para essa disciplina já foi cadastrada para esse aluno.")
+                return
             self.inserirDados(aluno, disciplina, nota)
             self.fLimparTela()
             print('Nota Cadastrada com Sucesso!')
         except Exception as e:
             print('Não foi possível fazer o cadastro.', e)
+
+    def verificarExistenciaNota(self, aluno, disciplina):
+        try:
+            query_verificar_existencia = f"""
+                SELECT 1
+                FROM public.notas n
+                JOIN public.alunos a ON n.aluno_id = a.id
+                JOIN public.disciplinas d ON n.disciplina_id = d.id
+                WHERE a.nome = '{aluno}' AND d.nome = '{disciplina}'
+            """
+            self.db_pg_context.conectar()
+            resultado = self.db_pg_context.executar_query_sql(query_verificar_existencia)
+            self.db_pg_context.desconectar()
+            return bool(resultado)
+        except Exception as e:
+            print('Não foi possível verificar a existência da nota.', e)
+            return False
 
     def inserirDados(self, aluno, disciplina, nota):
         try:
@@ -149,3 +200,12 @@ class TelaPrincipal:
         self.win.withdraw()
         lista_notas = TelaSelecao(self.win)
         lista_notas.mainloop()
+
+
+# Criação da janela principal e inicialização do aplicativo
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TelaPrincipal(root)
+    root.title("Sistema de Notas")
+    root.geometry("600x400")
+    root.mainloop()
