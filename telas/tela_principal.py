@@ -13,49 +13,49 @@ class TelaPrincipal:
         self.lblNota = tk.Label(win, text='Nota:')
 
         self.txtAluno = tk.Entry(bd=3)
-        self.txtDisciplina = tk.Entry()
-        self.txtNota = tk.Entry()
+        self.txtDisciplina = tk.Entry(bd=3)
+        self.txtNota = tk.Entry(bd=3)
 
-        self.btnCadastrar = tk.Button(win, text='Cadastrar', command=self.fCadastrarNota)
-        self.btnAtualizar = tk.Button(win, text='Atualizar', command=self.fAtualizarNota)
-        self.btnExcluir = tk.Button(win, text='Excluir', command=self.fExcluirNota)
-        self.btnLimpar = tk.Button(win, text='Limpar', command=self.fLimparTela)
-        self.btnListaAlunos = tk.Button(win, text='Lista de Alunos', command=self.ListaAlunosbtnListaAlunos)
-        self.btnCalcularCR = tk.Button(win, text='Calcular CR', command=self.fCalcularCR)
+        self.btnCadastrar = tk.Button(win, text='\n    Cadastrar    \n', command=self.fCadastrarNota)
+        self.btnAtualizar = tk.Button(win, text='\n    Atualizar    \n', command=self.fAtualizarNota)
+        self.btnExcluir = tk.Button(win, text='\n      Excluir      \n', command=self.fExcluirNota)
+        self.btnLimpar = tk.Button(win, text='\n\n     Limpar     \n\n     Campos     \n\n', command=self.fLimparTela)
+        self.btnListaNotas = tk.Button(win, text='\n           Lista de Notas           \n', command=self.ListaNotasbtnListaNotas)
+        self.btnListaCR = tk.Button(win, text='\n               Lista de  CR               \n', command=self.fListaCR)
 
         # Posicionamento dos Componentes
-        self.lbAluno.place(x=100, y=50)
-        self.txtAluno.place(x=250, y=50)
-        self.lblDisciplina.place(x=100, y=100)
-        self.txtDisciplina.place(x=250, y=100)
-        self.lblNota.place(x=100, y=150)
-        self.txtNota.place(x=250, y=150)
-        self.btnCadastrar.place(x=100, y=200)
-        self.btnAtualizar.place(x=200, y=200)
-        self.btnExcluir.place(x=300, y=200)
-        self.btnLimpar.place(x=400, y=200)
-        self.btnListaAlunos.place(x=100, y=250)
-        self.btnCalcularCR.place(x=250, y=250)
+        self.lbAluno.place(x=70, y=50)
+        self.txtAluno.place(x=200, y=50)
+        self.lblDisciplina.place(x=70, y=100)
+        self.txtDisciplina.place(x=200, y=100)
+        self.lblNota.place(x=70, y=150)
+        self.txtNota.place(x=200, y=150)
+        self.btnCadastrar.place(x=70, y=200)
+        self.btnAtualizar.place(x=215, y=200)
+        self.btnExcluir.place(x=350, y=200)
+        self.btnLimpar.place(x=350, y=53)
+        self.btnListaNotas.place(x=70, y=300)
+        self.btnListaCR.place(x=280, y=300)
 
         # Inicia a conexão com o banco de dados
         self.db_pg_context = Postgre_Sql_Context()
 
-    def fCalcularCR(self):
+    def fListaCR(self):
         try:
             self.db_pg_context.conectar()
-            query_calcular_cr = """
+            query_lista_cr = """
                 SELECT a.nome AS aluno, AVG(n.nota) AS cr
                 FROM public.notas n
                 JOIN public.alunos a ON n.aluno_id = a.id
                 GROUP BY a.nome
                 ORDER BY cr DESC;
             """
-            resultados = self.db_pg_context.executar_query_sql(query_calcular_cr)
+            resultados = self.db_pg_context.executar_query_sql(query_lista_cr)
             self.db_pg_context.desconectar()
 
             self.mostrarResultadosCR(resultados)
         except Exception as e:
-            print('Não foi possível calcular o CR.', e)
+            print('Não foi possível listar o CR.', e)
 
     def mostrarResultadosCR(self, resultados):
         top = tk.Toplevel(self.win)
@@ -69,7 +69,7 @@ class TelaPrincipal:
             tree.insert('', tk.END, values=(resultado[0], round(resultado[1], 2)))
 
         tree.pack(expand=True, fill='both')
-        top.geometry("400x300")
+        top.geometry("500x500")
 
     def fCadastrarNota(self):
         try:
@@ -196,7 +196,7 @@ class TelaPrincipal:
             print('Não foi possível ler os dados.', e)
             return "", "", ""
 
-    def ListaAlunosbtnListaAlunos(self):
+    def ListaNotasbtnListaNotas(self):
         self.win.withdraw()
         lista_notas = TelaSelecao(self.win)
         lista_notas.mainloop()
@@ -207,5 +207,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = TelaPrincipal(root)
     root.title("Sistema de Notas")
-    root.geometry("600x400")
+    root.geometry("500x500")
     root.mainloop()

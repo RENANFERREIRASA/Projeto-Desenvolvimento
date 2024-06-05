@@ -8,7 +8,7 @@ class TelaSelecao(tk.Toplevel):
         super().__init__(master)
         self.master = master
         self.title("Lista de Notas")
-        self.geometry("600x500")
+        self.geometry("500x500")
 
         # Exemplo de componente da tela de seleção
         self.label = ttk.Label(self, text="Lista de Notas Cadastradas")
